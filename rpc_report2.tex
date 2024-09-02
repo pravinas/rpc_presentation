@@ -40,22 +40,18 @@
 \usepackage[style=numeric-comp]{biblatex}
 \usepackage{color}
 \usepackage{subcaption}
-\usepackage{ulem}
-\usepackage{multirow}
-\usepackage{booktabs}
-\usepackage{siunitx}
+\usepackage{cancel}
 
 \addbibresource{./assets/sources.bib}
 \newcommand{\todo}[1]{\textbf{\color{red}#1}}
 \newcommand{\citationneeded}{\textbf{\color{blue}[Citation Needed]}}
-\newcommand{\subheading}[1]{\vspace{10px}\noindent\textbf{#1}}
 
 \begin{document}
 \begin{titlepage}
    \begin{center}
        \vspace*{1cm}
 
-       \textbf{The Motion Primitives of Motions in Microseconds}
+       \textbf{A Review of Motions in Microseconds}
 
        %\vspace{0.5cm}
        % Thesis Subtitle
@@ -82,45 +78,31 @@
 		\vspace{2cm}
      
        \includegraphics[width=0.4\textwidth]{./assets/BU_logo.png}
-
-\begin{abstract}
-\textit{Motions in Microseconds}\cite{paper:MiM} discusses a method for vectorizing sampling-based motion planning. By using the architectural principles of fine-grained parallelism and work-ordering, the researchers were able to achieve a 500$\times$ speedup over previous state-of-the-art approaches. They identify particular ``primitive'' actions within the general form of a sampling-based algorithm, the most time-intensive of which are forward kinematics (\textsc{fk}) and collision checking (\textsc{cc}). By producing optimizations within these primitives, they optimize them for parallel execution.%They optimize these elements for parallel execution using a ``raked'' motion validator \cite{paper:eemp}
-\end{abstract}
             
    \end{center}
 \end{titlepage}
 
 % \listoffigures
 
-%\todo{Big Todos: 
-%\begin{itemize}
-%\item \sout{Some phrasing may match MiM a little too closely; run through plagiarism checker.}
-%\item \sout{Replace \citationneeded with actual citations.}
-%\item Abstract (150 wd max)
-%\item add \textit{context}, more so than details 
-%\item Break down S/W 
-%\item discuss VAMP implementation details
-%\item \sout{Add details to what the primitives are.}
-%\item How do you utilize information on the manipulator environments?
-%\end{itemize}}
-
+%\todo{Big Todos: \begin{itemize}\item Some phrasing may match MiM a little too closely; run through plagiarism checker. \item \cancel{Replace \citationneeded with actual citations.}\item Abstract (150 wd max)\item add \textit{context}, more so than details\end{itemize}}
 
 \section{Introduction}
 
 Sampling-based motion planners have computationally expensive subroutines, including collision checking, nearest neighbors search, and forward kinematics. By improving the performance of some of these planning primitives, sampling-based motion planners can acheive substantial improvements. Sampling-based motion planners are commonly used in robotics, and speedups in this domain can improve safety and responsiveness. Motion planning for robotic manipulation tasks often takes several seconds to execute \cite{paper:MiM}. If motion planning can be done on the fly, the ability to plan reactively could expose whole problem domains that were previously impractical to explore. %Domestic applications such as cooking are now possible. \todo{Ask Radhika about what those problem domains are.}
 
-\subheading{Planning Primitives} 
-Sampling based motion planning (\textsc{sbmp}) algorithms such as \textsc{rrt}, \textsc{prm}, and \textsc{est} \cite{paper:OMPL} can all be broken down into several common steps. They must all sample the state space, building a state tree to explore. This typically makes use of a \textit{nearest neighbors} (\textsc{nn}) search of the state space. The state is mapped to physical space using \textit{forward kinematics} (\textsc{fk}). The planner next \textit{checks for collisions} (\textsc{cc}) to ensure that the selected state does not collide with any obstacles in the environment, nor does any point in the state space along the edge that is added. This itself involves \textsc{fk} in order to calculate the collisions. \textsc{cc} is conventionally thought to be the most computationally intensive step of the process \cite{paper:MiM}, so the focus of the paper is on optimizing \textsc{fk} and \textsc{cc}. 
+By using the architectural principles of fine-grained parallelism and work-ordering, the researchers were able to achieve a 500x speedup over previous state-of-the-art approaches.
+
+\subsection{Planning Primitives}
+
+Sampling based motion planning (\textsc{sbmp}) algorithms such as \textsc{rrt}, \textsc{prm}, and \textsc{est} \cite{paper:OMPL} can all be broken down into several common steps. They must all sample the state space, building a state tree to explore. This typically makes use of a \textit{nearest neighbors} (\textsc{nn}) search of the state space. The state is mapped to physical space using \textit{forward kinematics} (\textsc{fk}). The planner next \textit{checks for collisions} (\textsc{cc}) to ensure that the selected state does not collide with any obstacles in the environment, nor does any point in the state space along the edge that is added. This is conventionally thought to be the most computationally intensive step of the process \cite{paper:MiM}. 
 
 %\todo{I'm poking through the cited Choset etal but not finding an explicit breakdown of planning primitives like above. I'm not entirely sure this is exhaustive.}
 
-\subheading{State of the Art} %This is a section to beef up. Mention RACOD.
+\subsection{State of the Art}
+%This is a section to beef up. Mention RACOD.
+
 Collision checks are performed in two sweeps: \textit{broadphase} and \textit{narrowphase}. Broadphase approximates a set of possible collisions by modeling the environment in faster-to-compute ways. Narrowphase takes these possible collisions and returns the actual collisions.
 Historically, \textsc{sbmp} has been parallelized in a coarse-grained fashion, running many independent planners in parallel. There is space to optimize \textsc{sbmp} parallelism in terms of the planning primitives the authors identified. 
-
-Prior approaches to parallelizing \textsc{fk} faced issues with data dependencies between link transforms. Spurious dependencies prevented efficient parallelization of pose evaluation \cite{paper:MiM}.
-
-With regards to modern collision checking, Shah et al \cite{paper:eemp} devised a method for incorporating local sparsity patterns into the parallelized motion computations, which utilized a tree structured path validation system to minimize the number of computations needed to verify that a given motion is collision-free.
 
 \section{Innovation}
 
@@ -128,8 +110,9 @@ In the paper, the authors present Vector Accelerated Motion Planning (\textsc{va
 
 One of the major innovations presented is the use of a \textit{Struct-of-Arrays}, as opposed to the more traditional \textit{Array-of-Structs}. Figure \ref{fig:soa_aos} shows the difference in memory layouts between these two approaches.
 
+
 Due to CPU memory access patterns, the Struct-of-Arrays layout is more favorable for SIMD approaches. \textsc{vamp} replaces the existing \textsc{cc} \& \textsc{fk} primitives with vector-oriented versions, reducing the cost of given computation. 
-In order to vectorize \textsc{fk}, \textsc{vamp} generates a \textit{trace} from a URDF representation of a robot to create an unrolled loop. 
+In order to vectorize \textsc{fk}, \textsc{vamp} generates a \textit{trace} from a URDF to create an unrolled loop. 
 In order to vectorize \textsc{cc}, the robots and obstacles are represented as a composition of bounding volumes (e.g. spheres), and collisions are calculated between these known geometries.
 
 Another optimization they make is to use a \textit{raked motion validator} as discussed in \cite{paper:eemp}, which computes collisions on several distinct potential motions in parallel. Because these distinct motions are spatially distributed, the validity of the states being checked in parallel can be assumed to be roughly independent. This reduces wasted computation time checking correlated states.
@@ -138,38 +121,33 @@ Another optimization they make is to use a \textit{raked motion validator} as di
 
 \section{Strengths \& Weaknesses}
 
-This paper shows how some simple optimizations can yield serious empirical results, including a 500$\times$ speedup over the state of the art. However, the authors fail to pose the question of \textit{why} they get these results. They combine several innovations, but it remains unclear how each impacts end to end performance.
+This paper shows how some simple optimizations can yield serious empirical results, including a 500x speedup over the state of the art. However, the authors fail to pose the question of \textit{why} they get these results. They combine several innovations, but it remains unclear how each impacts end to end performance.
 
-Figure \ref{fig:cc_nn} shows a preliminary analysis of the end-to-end breakdown of motion planning performance, specifically in terms of the collision checking and nearest neighbor planning primitives.
+\ref{fig:cc_nn} shows a preliminary analysis of the end-to-end breakdown of motion planning performance, specifically in terms of the collision checking and nearest neighbor planning primitives.
 
-The paper also does not include much exploration on why different workloads show different amounts of improvement with the \textsc{vamp} optimizations. There’s less of a speedup vs MoveIt (see Table \ref{fig:data_table}) in the 8DOF Fetch robot (34$\times$) than the 7DOF Panda (1126$\times$), though the speedup still very significant.
+The paper also does not include much exploration on why different workloads show different amounts of improvement with the \textsc{vamp} optimizations. There’s less of a speedup in the 8DOF Fetch robot than the 7DOF Panda, though the speedup still very significant. 
 
-\begin{table}[]
+%\includegraphics[width=0.8\textwidth]{./assets/78_table.png} \cite{paper:MiM}
 
-\centering
-  \sisetup{table-format = {$\times$ 4.2}, table-align-text-before = false}
-  \begin{tabular}{ll*{5}{@{\hspace{4pt}} >{$\times$} S}}
-  \toprule
-        & vs \textsc{vamp} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{Q1} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{Q3} & \multicolumn{1}{c}{95\%} \\
-  \midrule
-  Panda & PyBullet/\textsc{ompl} & 403.03 & 797.69  & 888.46   & 786.02 & 360.09 \\
-        & MoveIt/\textsc{ompl}   & 55.36  & 2594.63 & 1126.30  & 247.47 & 28.35  \\
-  \midrule
-  Fetch & PyBullet/\textsc{ompl} & 108.01 & 314.31  & 434.04   & 212.13 & 86.64  \\
-        & MoveIt/\textsc{ompl}   & 13.39  & 60.95   & 34.47    & 16.51  & 11.86  \\
-  \bottomrule
+\begin{figure}
+\label{fig:data_table}
+\begin{tabular}{r|r|r|r|}
+Robot & System & Mean Speedup & Median Speedup \\
+\hline \\
+Panda & PyBullet/\textsc{ompl} & 403x & 888x \\
+ & MoveIt/\textsc{ompl} & 55x & 1126x \\
+\hline \\
+Fetch & PyBullet/\textsc{ompl} & 108x & 434x \\
+ & MoveIt/\textsc{ompl} & 13x & 34x \\
 \end{tabular}
-
-\caption{A comparison of different state of the art collision checking frameworks. These numbers represent how much of an improvment \textsc{vamp} is over the other framework in terms of computation time divided by \textsc{vamp}'s computation time. Data taken from \cite{paper:MiM} Table II.}\label{fig:data_table}
-\end{table}
+\caption{A comparison of \textsc{vamp} against PyBullet \citationneeded and MoveIt \citationneeded, both state of the art collision checking frameworks. These numbers represent how much of an improvment \textsc{vamp} is over the other framework rounded to the nearest whole number. Data taken from \cite{paper:MiM} Table II.}
+\end{figure}
 
 \section{Future Work}
 
 By intelligently ordering operations, \textit{Motions in Microseconds} was able to speed up their execution. However, there is a wealth of structured information in a given motion planning and manipulation problem that this algorithm does not exploit. In particular, the structure of the manipulator and its environment is not deeply explored.
 
-I want to explore the particulars of the vectorized collision checking subroutine. While there is significant work in the robotics community using spheres as geometric primitives \cite{paper:cuRobo}, there is research outside of the robotics domain regarding colliders using different kinds of geometric primitives, such as trimeshes and capsules \cite{web:UE_cols}. Notably, by exploiting known information about the robot's environment there is potential for further optimizations in the collision checking routines. For instance, if a scene is populated with objects whose properties are known at compile time (e.g. tables, chairs, boxes), the robotic system could use unrolled collision computations for a given geometry to speed up calculations. Such information could be incorporated into a domain-specific compiler system such as \cite{paper:BuildIt} in order to exploit these optimizations.
-
-%tradeoffs and optimizations
+I want to explore the particulars of the vectorized collision checking subroutine. While there is significant work in the robotics community using spheres as geometric primitives \cite{paper:cuRobo}, there is research outside of the robotics domain regarding colliders using different kinds of geometric primitives, such as trimeshes and capsules \cite{web:UE_cols}. 
 
 %\todo{brainstorm a list of possible future work with radhika}
 %domain specific compilers
@@ -180,9 +158,8 @@ I want to explore the particulars of the vectorized collision checking subroutin
 \section{Figures}
 
 \begin{figure}[h]
-\centering
-\includegraphics[width=0.6\textwidth]{./assets/soa_aos.png}
-\caption{Figure duplicated from \cite{paper:MiM}. This shows the Array-of-Structs (\textsc{AoS}) and Struct-of-Arrays (\textsc{SoA}) memory layouts. The latter is more amenable to \textsc{simd} instructions.}
+\includegraphics[width=0.8\textwidth]{./assets/soa_aos.png}
+\caption{Figure duplicated from \cite{paper:MiM}. This shows the Array-of-Structs (\textsc{AoS}) and Struct-of-Arrays (\textsc{SoA}) memory layouts. The latter is more amenable to \textsc{simd}} instructions.
 \label{fig:soa_aos}
 \end{figure}
 
