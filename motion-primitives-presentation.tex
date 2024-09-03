@@ -97,4 +97,71 @@ Over the years, many optimizations have been introduced to \textsc{sbmp}. We wil
 \includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_8.png}
 \end{frame}
 
+\subsection{Planning Primitives}
+
+\begin{frame}{Planning Primitives}
+% Having gone over the shape of RRT, let's identify what common primitives happen across many sampling-based motion planners.
+\pause
+\begin{block}{Nearest Neighbors Search (\textsc{nn})}
+Part of the sampling function for the state space.
+\end{block}
+
+\begin{block}{Forward Kinematics (\textsc{fk})}
+Maps configuration-space elements to physical space.
+\end{block}
+
+\begin{block}{Collision Checking (\textsc{cc})}
+Ensures that obstacles do not collide with the robot. Uses many passes of \textsc{fk} in computation. 
+\end{block}
+
+\textsc{cc} is conventionally thought of as the most computationally intensive step of the motion planning process.%, so much of the discussion is in optimizing \textsc{cc} and \textsc{fk}
+
+\end{frame}
+
+\begin{frame}
+\centering
+\textbf{How do we optimize these computationally intensive tasks?}
+\end{frame}
+
+\subsection{State of the Art}
+
+\begin{frame}
+\textsc{fk} computations are difficult to parallelize due to the robot geometry introducing data dependencies.
+
+In order to minimize the total number of \textsc{cc} calls, it is often performed in two steps, \textit{broadphase} and \textit{narrowphase}. \cite{paper:eemp} developed a method for using local sparsity patterns in a parallel manner.
+\end{frame}
+
+\section{Motions in Microseconds}
+
+\subsection{\textsc{vamp}}
+
+%\cite{paper:MiM} presents Vector-Accelerated Motion Planning (\textsc{vamp}).
+
+\begin{frame}{Vectorizing Motion Planning}
+\pause
+\begin{block}{Vector}
+A \textit{vector} is a fixed-length sequence of scalar values.
+\end{block}
+
+\begin{block}{Vectorized Operation}
+A \textit{vectorized operation} acts on all values within the vector. This operation must be done independently, in parallel.
+\end{block}
+
+\pause
+The authors of this work chose to focus on CPU-level parallelism, rather than GPU-level, process-level, or thread-level parallelism, so as to incur less overhead.
+\end{frame}
+
+\begin{frame}{Vector Accelerated Motion Planning (\textsc{vamp})}
+\pause
+\textsc{vamp}'s innovations over State of the Art:
+\begin{itemize}
+\item Struct-of-Arrays data representation
+\item URDF trace-based loop unrolling
+\item Geometric Intersection Tests
+\item Raked Motion Validator implementation
+\end{itemize}
+\end{frame}
+
+
+
 \end{document}
