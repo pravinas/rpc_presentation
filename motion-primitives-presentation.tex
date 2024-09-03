@@ -148,7 +148,7 @@ A \textit{vectorized operation} acts on all values within the vector. This opera
 \end{block}
 
 \pause
-The authors of this work chose to focus on CPU-level parallelism, rather than GPU-level, process-level, or thread-level parallelism, so as to incur less overhead.
+\cite{paper:MiM} chose to focus on CPU-level parallelism, rather than GPU-level, process-level, or thread-level parallelism, so as to incur less overhead.
 \end{frame}
 
 \begin{frame}{Vector Accelerated Motion Planning (\textsc{vamp})}
@@ -156,12 +156,87 @@ The authors of this work chose to focus on CPU-level parallelism, rather than GP
 \textsc{vamp}'s innovations over State of the Art:
 \begin{itemize}
 \item Struct-of-Arrays data representation
-\item URDF trace-based loop unrolling
+\item Tracing Compiler
 \item Geometric Intersection Tests
 \item Raked Motion Validator implementation
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Struct-of-Arrays}
+%The more intuitive data representation is AoS, but
+\centering
+\includegraphics[width=\textwidth]{./assets/soa_aos.png}
+\end{frame}
 
+\begin{frame}{Tracing Compiler}
+%\textsc{fk} has been difficult to parallelize with prior approaches due to data dependencies between link transforms in the kinematic chain.
+To vectorize \textsc{fk}:
+\begin{itemize}
+\item Trace the operations of the robot's kinematics from a \textsc{urdf} file.
+\item Generate a vector configuration structure for a batch of configurations. 
+\item Output a minimal set of operations to compute the traced function as an unrolled loop.
+\end{itemize}
 
+Notably, this tracing technique generates optimized \textsc{fk} implementations at compile time through automatic code generation.
+\end{frame}
+
+\begin{frame}{Geometric Intersection Tests}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+By representing the robot as a system of geometric objects, intersection tests between pairs of objects can be vectorized.
+
+\vspace{10px}
+
+This approach does away with the staged broadphase and narrowphase approach to collision checking, but focuses soley on narrowphase.
+\end{column}
+\begin{column}{0.5\textwidth}
+\includegraphics[width=\textwidth]{./assets/panda_spheres.png}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Raked Motion Validator Implementation}
+\includegraphics[width=\textwidth]{./assets/eemp_mv.png}
+
+[\cite{paper:eemp}]
+\end{frame}
+
+\section{Strengths \& Weaknesses}
+
+\subsection{Strengths}
+
+\begin{frame}{Strengths}
+With straightforward architechtural optimizations, the authors get upwards of 500$\times$ speedups over PyBullet, and 100-200$\times$ over MoveIt, both using \textsc{ompl} for the motion planning implementation.
+
+%The authors made innovations that no one before them realized would matter so significantly.
+\end{frame}
+
+\begin{frame}{Weaknesses}
+The authors don't consider end-to-end performance impacts. \todo{it's too late. include table?}
+
+\todo{What difference does the 7DOF vs 8DOF robot make?}
+\end{frame}
+
+\section{Future Work}
+
+\begin{frame}{Future Work}
+\todo{polish, format, beef up}
+
+\begin{itemize}
+\item exploit structured information about manipulator \& environment
+\item explore non-sphere geometric representations of colliders (eg trimeshes, capsules)
+\end{itemize}
+\end{frame}
+
+\section {TODO}
+
+\begin{frame}
+\todo{Things to improve
+\begin{enumerate}
+\item Future Work
+\item Strengths \& Weaknesses
+\item Figures post-presentation
+\item explanation of raked mv
+\end{enumerate}}
+\end{frame}
 \end{document}
