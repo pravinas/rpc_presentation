@@ -5,6 +5,10 @@
 \usepackage{subcaption}
 \usepackage{cancel}
 \usepackage{graphviz}
+\usepackage{animate}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{siunitx}
 
 % BEAMER SETUP
 \usetheme{CambridgeUS}
@@ -37,28 +41,37 @@
 \end{frame}
 
 \begin{frame}{Presentation Overview}
-\begin{itemize}
+\begin{enumerate}
+\item Motivation \\
 \item Sampling-Based Motion Planning \\
 \item Motion Primitives \\
 \item \textit{Motions in Microseconds} \\
 \item Strengths \& Weaknesses\\
 \item Future Work \\
-\end{itemize}
+\end{enumerate}
 \end{frame}
 
 \section{Introduction}
+
+\subsection{Motivation}
+\begin{frame}{Motivation}
+\centering
+\animategraphics[loop,width=\textwidth]{7}{./assets/falling-robots/falling-robots-}{0}{47}
+(source: https://spectrum.ieee.org/falling-robots)
+\end{frame}
+
 \subsection{\textsc{sbmp}}
 
 \begin{frame}{Sampling-Based Motion Planning}
 
 \pause
 \begin{block}{What is Sampling-Based Motion Planning (\textsc{sbmp})?}
-\pause Sampling-based motion planning \textsc{sbmp} is a method of determining how a robot moves through configuration space by sampling values from that space. %list off examples of algorithms, note tree-based vs graph-based
+Sampling-based motion planning \textsc{sbmp} is a method of determining how a robot moves through configuration space by sampling values from that space. %list off examples of algorithms, note tree-based vs graph-based
 \end{block}
 
 \pause
 \begin{block}{Why is it relevant?} 
-\pause \textsc{sbmp} algorithms are widely applicable and used in many fields. %list them off here
+\textsc{sbmp} algorithms are widely applicable and used in many fields. %list them off here
 However, it can take several seconds for \textsc{sbmp} methods to execute, so there is ample space for innovation.
 \end{block}
 
@@ -75,6 +88,10 @@ Over the years, many optimizations have been introduced to \textsc{sbmp}. We wil
 
 \begin{frame}{Example \textsc{sbmp} Execution: Sampling}
 \includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.png}
+\end{frame}
+
+\begin{frame}{Example \textsc{sbmp} Execution: State Validation}
+\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.5.png}
 \end{frame}
 
 \begin{frame}{Example \textsc{sbmp} Execution: Local Planning}
@@ -99,11 +116,11 @@ Over the years, many optimizations have been introduced to \textsc{sbmp}. We wil
 
 \subsection{Planning Primitives}
 
-\begin{frame}{Planning Primitives}
+\begin{frame}[label=p_primitives]{Planning Primitives}
 % Having gone over the shape of RRT, let's identify what common primitives happen across many sampling-based motion planners.
 \pause
 \begin{block}{Nearest Neighbors Search (\textsc{nn})}
-Part of the sampling function for the state space.
+Part of the sampling function for the configuration space.
 \end{block}
 
 \begin{block}{Forward Kinematics (\textsc{fk})}
@@ -114,7 +131,7 @@ Maps configuration-space elements to physical space.
 Ensures that obstacles do not collide with the robot. Uses many passes of \textsc{fk} in computation. 
 \end{block}
 
-\textsc{cc} is conventionally thought of as the most computationally intensive step of the motion planning process.%, so much of the discussion is in optimizing \textsc{cc} and \textsc{fk}
+\textsc{cc} is conventionally thought of as the most computationally intensive step of the motion planning process. \cite{paper:rrt90}%, so much of the discussion is in optimizing \textsc{cc} and \textsc{fk}
 
 \end{frame}
 
@@ -125,10 +142,13 @@ Ensures that obstacles do not collide with the robot. Uses many passes of \texts
 
 \subsection{State of the Art}
 
-\begin{frame}
-\textsc{fk} computations are difficult to parallelize due to the robot geometry introducing data dependencies.
-
-In order to minimize the total number of \textsc{cc} calls, it is often performed in two steps, \textit{broadphase} and \textit{narrowphase}. \cite{paper:eemp} developed a method for using local sparsity patterns in a parallel manner.
+\begin{frame}{State of the Art}
+\begin{itemize}
+\item Motion planning parallelism is typically acheived by running several independent planners in parallel. %What the authors refer to as coarse-grained parallelism
+\item Hardware acceleration of motion planning has been explored, but necessarily introduces latency when communicating with the CPU.
+\item \textsc{fk} computations are difficult to parallelize due to the robot geometry introducing data dependencies.
+\item In order to minimize the total number of \textsc{cc} calls, it is often performed in two steps, \textit{broadphase} and \textit{narrowphase}. \cite{paper:eemp} developed a method for using local sparsity patterns in a parallel manner.
+\end{itemize}
 \end{frame}
 
 \section{Motions in Microseconds}
@@ -152,6 +172,10 @@ A \textit{vectorized operation} acts on all values within the vector. This opera
 \end{frame}
 
 \begin{frame}{Vector Accelerated Motion Planning (\textsc{vamp})}
+\textsc{vamp} presents a novel planner that uses \textit{fine-grained} instruction-level parallelism to achieve substantial speedups.
+
+\vspace{10px}
+
 \pause
 \textsc{vamp}'s innovations over State of the Art:
 \begin{itemize}
@@ -167,6 +191,10 @@ A \textit{vectorized operation} acts on all values within the vector. This opera
 \centering
 \includegraphics[width=\textwidth]{./assets/soa_aos.png}
 \end{frame}
+%
+%\begin{frame}{\textsc{fk} Calculation}
+%\todo{walk thru featherstone 4.3}
+%\end{frame}
 
 \begin{frame}{Tracing Compiler}
 %\textsc{fk} has been difficult to parallelize with prior approaches due to data dependencies between link transforms in the kinematic chain.
@@ -195,10 +223,9 @@ This approach does away with the staged broadphase and narrowphase approach to c
 \end{columns}
 \end{frame}
 
-\begin{frame}{Raked Motion Validator Implementation}
-\includegraphics[width=\textwidth]{./assets/eemp_mv.png}
-
-[\cite{paper:eemp}]
+\begin{frame}{Raked Motion Validator: Putting it all together}
+\centering
+\includegraphics[width=\textwidth]{./assets/mim_raked_mv_rearrange.png}
 \end{frame}
 
 \section{Strengths \& Weaknesses}
@@ -206,37 +233,108 @@ This approach does away with the staged broadphase and narrowphase approach to c
 \subsection{Strengths}
 
 \begin{frame}{Strengths}
+\begin{columns}
+\begin{column}{0.5\textwidth}
 With straightforward architechtural optimizations, the authors get upwards of 500$\times$ speedups over PyBullet, and 100-200$\times$ over MoveIt, both using \textsc{ompl} for the motion planning implementation.
+\end{column}
+\begin{column}{0.5\textwidth}
+\includegraphics[width=\textwidth]{./assets/panda_graphs.png}
+\end{column}
+\end{columns}
 
 %The authors made innovations that no one before them realized would matter so significantly.
 \end{frame}
 
 \begin{frame}{Weaknesses}
-The authors don't consider end-to-end performance impacts. \todo{it's too late. include table?}
+The authors don't show an ablation study of which optimizations make which end-to-end performance impacts.
+\vspace{5px}
 
-\todo{What difference does the 7DOF vs 8DOF robot make?}
+The paper does not describe what impacts the optimizations have as the problem size scales. The below table shows massive differences between the 7DOF Panda and the 8DOF Fetch robot.
+
+\begin{table}[width=0.8\textwidth]
+
+\centering
+  \sisetup{table-format = {$\times$ 4.2}, table-align-text-before = false}
+  \begin{tabular}{ll*{5}{@{\hspace{4pt}} >{$\times$} S}}
+  \toprule
+        & vs \textsc{vamp} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{Q1} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{Q3} & \multicolumn{1}{c}{95\%} \\
+  \midrule
+  Panda & PyBullet & 403.03 & 797.69  & 888.46   & 786.02 & 360.09 \\
+        & MoveIt  & 55.36  & 2594.63 & 1126.30  & 247.47 & 28.35  \\
+  \midrule
+  Fetch & PyBullet & 108.01 & 314.31  & 434.04   & 212.13 & 86.64  \\
+        & MoveIt   & 13.39  & 60.95   & 34.47    & 16.51  & 11.86  \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
 \end{frame}
 
 \section{Future Work}
 
-\begin{frame}{Future Work}
-\todo{polish, format, beef up}
-
+\begin{frame}{Avenues for Future Work}
 \begin{itemize}
-\item exploit structured information about manipulator \& environment
-\item explore non-sphere geometric representations of colliders (eg trimeshes, capsules)
+\item Measure and identify precise bottlenecks within \textsc{sbmp}
+\item Optimize geometric intersection tests further
+\item Algorithm-compute codesign
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Measuring Bottlenecks}
+\includegraphics[width=\textwidth]{./assets/cc_nn_zoom.png}
+\end{frame}
+
+\begin{frame}{Bounding Volume Fidelity Research}
+\begin{itemize}
+\item Exploit structured information about manipulator \& environment
+\item Explore non-sphere geometric representations of colliders (eg trimeshes, capsules)
+\item Explore bounding volume hierarchy fidelity
+\end{itemize}
+\centering
+\includegraphics[height=0.37\textheight]{./assets/geom_fidelity.png}
+\end{frame}
+
+\begin{frame}{Algorithm-compute Codesign}
+When should we devote resources to one motion primitive over another? How do we separate \textit{what} we compute from \textit{how}?
+
+\todo{Paraphrase Radhika's description, find picture}
+\end{frame}
+
+\begin{frame}{End of Presentation}
+\end{frame}
+
+\section{Extra Figures}
+
+\begin{frame}{Raked Motion Validator Implementation}
+\includegraphics[width=\textwidth]{./assets/eemp_mv.png}
+
+[\cite{paper:eemp}]
+\end{frame}
+
+\begin{frame}{2D Configuration Space Visualization}
+\includegraphics[width=\textwidth]{./assets/c_space.png}
+[https://www.cs.unc.edu/~jeffi/c-space/robot.xhtml]
+\end{frame}
+
+\begin{frame}{Edge Validation vs State Validation}
+\includegraphics[width=\textwidth]{./assets/ev_sv_zoom.png}
+\end{frame}
+
+\begin{frame}{Scene Collisions vs Self Collisions}
+\includegraphics[width=\textwidth]{./assets/sc_sc_zoom.png}
 \end{frame}
 
 \section {TODO}
 
-\begin{frame}
-\todo{Things to improve
+\begin{frame}{\todo{Things to improve}}
 \begin{enumerate}
-\item Future Work
-\item Strengths \& Weaknesses
+\item Buff Future Work Slide
+\item Strengths \& Weaknesses both need a lift
+\item explanation of raked mv. animate?
+\item \textsc{fk} explanation on slide \ref{p_primitives} using featherstone ex 4.3 (ty radhika)
+\item cite things better, add bibliography
 \item Figures post-presentation
-\item explanation of raked mv
-\end{enumerate}}
+\end{enumerate}
 \end{frame}
 \end{document}
