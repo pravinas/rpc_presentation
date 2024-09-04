@@ -137,7 +137,7 @@ Maps configuration-space elements to physical space.
 Ensures that obstacles do not collide with the robot. Uses many passes of \textsc{fk} in computation. 
 \end{block}
 
-\textsc{cc} is conventionally thought of as the most computationally intensive step of the motion planning process. \cite{paper:rrt90}%, so much of the discussion is in optimizing \textsc{cc} and \textsc{fk}
+\textsc{cc} is conventionally thought of as the most computationally intensive step of the motion planning process, taking up to 90\% of planning time. [\cite{paper:rrt90}]%, so much of the discussion is in optimizing \textsc{cc} and \textsc{fk}
 
 \end{frame}
 
@@ -150,10 +150,10 @@ Ensures that obstacles do not collide with the robot. Uses many passes of \texts
 
 \begin{frame}{State of the Art}
 \begin{itemize}
-\item Motion planning parallelism is typically acheived by running several independent planners in parallel. %What the authors refer to as coarse-grained parallelism
-\item Hardware acceleration of motion planning has been explored, but necessarily introduces latency when communicating with the CPU.
-\item \textsc{fk} computations are difficult to parallelize due to the robot geometry introducing data dependencies.
-\item In order to minimize the total number of \textsc{cc} calls, it is often performed in two steps, \textit{broadphase} and \textit{narrowphase}. \cite{paper:eemp} developed a method for using local sparsity patterns in a parallel manner.
+\pause \item Motion planning parallelism is typically acheived by running several independent planners in parallel. %What the authors refer to as coarse-grained parallelism
+\pause \item Hardware acceleration of motion planning has been explored, but necessarily introduces latency when communicating with the CPU.
+\pause \item \textsc{fk} computations are difficult to parallelize due to the robot geometry introducing data dependencies.
+\pause \item In order to minimize the total number of \textsc{cc} calls, it is often performed in two steps, \textit{broadphase} and \textit{narrowphase}. \cite{paper:eemp} developed a method for using local sparsity patterns in a parallel manner.
 \end{itemize}
 \end{frame}
 
@@ -206,8 +206,8 @@ Ensures that obstacles do not collide with the robot. Uses many passes of \texts
 }\only<3>{\includegraphics[width=\textwidth]{./assets/rake/rake_2.png}
 }\only<4>{\includegraphics[width=\textwidth]{./assets/rake/rake_2_obst.png}
 }\only<5>{\includegraphics[width=\textwidth]{./assets/rake/rake_3_obst.png}
-}\only<1>{\includegraphics[width=0.6\textwidth]{./assets/rrt_slides/rrt_slides_5.png}
-}\only<2>{\includegraphics[width=0.6\textwidth]{./assets/rake/rrt_slides_5.png}
+}\only<1>{\includegraphics[width=0.8\textwidth]{./assets/rrt_slides/rrt_slides_5.png}
+}\only<2>{\includegraphics[width=0.8\textwidth]{./assets/rake/rrt_slides_5.png}
 }\only<3>{\includegraphics[width=\textwidth]{./assets/rake/arm_no_obsts.png}
 }\only<4>{\includegraphics[width=\textwidth]{./assets/rake/arm_no_int.png}
 }\only<5>{\includegraphics[width=\textwidth]{./assets/rake/arm_int.png}
@@ -248,6 +248,9 @@ Notably, this tracing technique generates optimized \textsc{fk} implementations 
 \begin{frame}{Strengths}
 \begin{columns}
 \begin{column}{0.5\textwidth}
+\textit{Motions in Microseconds} represents serious improvements over State of the Art.
+\vspace{10px}
+
 With straightforward architechtural optimizations, the authors get upwards of 500$\times$ speedups over PyBullet, and 100-200$\times$ over MoveIt, both using \textsc{ompl} for the motion planning implementation.
 \end{column}
 \begin{column}{0.5\textwidth}
@@ -264,7 +267,7 @@ With straightforward architechtural optimizations, the authors get upwards of 50
 The authors don't show an ablation study of which optimizations make which end-to-end performance impacts.
 \vspace{5px}\pause
 
-The paper does not describe what impacts the optimizations have as the problem size scales. The below table shows massive differences between the 7DOF Panda and the 8DOF Fetch robot.
+The paper does not describe what impacts the optimizations have as the problem size scales. 
 
 \begin{table}[width=0.8\textwidth]
 
@@ -275,10 +278,10 @@ The paper does not describe what impacts the optimizations have as the problem s
         & vs \textsc{vamp} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{Q1} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{Q3} & \multicolumn{1}{c}{95\%} \\
   \midrule
   Panda & PyBullet & 403.03 & 797.69  & 888.46   & 786.02 & 360.09 \\
-        & MoveIt  & 55.36  & 2594.63 & 1126.30  & 247.47 & 28.35  \\
+  (7 DOF) & MoveIt  & 55.36  & 2594.63 & 1126.30  & 247.47 & 28.35  \\
   \midrule
   Fetch & PyBullet & 108.01 & 314.31  & 434.04   & 212.13 & 86.64  \\
-        & MoveIt   & 13.39  & 60.95   & 34.47    & 16.51  & 11.86  \\
+  (8 DOF) & MoveIt   & 13.39  & 60.95   & 34.47    & 16.51  & 11.86  \\
   \bottomrule
 \end{tabular}
 \end{table}
@@ -340,16 +343,23 @@ The paper does not describe what impacts the optimizations have as the problem s
 \includegraphics[width=\textwidth]{./assets/sc_sc_zoom.png}
 \end{frame}
 
-\section {TODO}
-
-\begin{frame}{\todo{Things to improve}}
+\begin{frame}{Further Credits}
 \begin{enumerate}
-\item Buff Future Work Slide
-\item Strengths \& Weaknesses both need a lift
-\item explanation of raked mv. animate.
-\item \textsc{fk} explanation on slide \ref{p_primitives} using featherstone ex 4.3 (ty radhika)
-\item cite things better, add bibliography
-\item Figures post-presentation
+\item \cite{annurev:sbmp} for concise motivation description.
+\item \cite{paper:cuRobo} for spherification figures
 \end{enumerate}
 \end{frame}
+
+%\section {TODO}
+%
+%\begin{frame}{\todo{Things to improve}}
+%\begin{enumerate}
+%\item Buff Future Work Slide
+%\item Strengths \& Weaknesses both need a lift
+%\item explanation of raked mv. animate.
+%\item \textsc{fk} explanation on slide \ref{p_primitives} using featherstone ex 4.3 (ty radhika)
+%\item cite things better, add bibliography
+%\item Figures post-presentation
+%\end{enumerate}
+%\end{frame}
 \end{document}
