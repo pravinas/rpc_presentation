@@ -24,7 +24,7 @@
 \DeclareMathOperator*{\argmin}{arg\,min} % thin space, limits underneath in displays
 
 % PRESENTATION METADATA
-\title[]{The Motion Primitives of Motions in Microseconds}
+\title[]{An Analysis of Motions in Microseconds}
 \author[]{Pravi Samaratunga}
 \institute{Boston University ECE}
 \date{\today}
@@ -41,14 +41,14 @@
 \end{frame}
 
 \begin{frame}{Presentation Overview}
-\begin{enumerate}
-\item Motivation \\
-\item Sampling-Based Motion Planning \\
-\item Motion Primitives \\
-\item \textit{Motions in Microseconds} \\
-\item Strengths \& Weaknesses\\
-\item Future Work \\
-\end{enumerate}
+\begin{itemize}
+\item 1. Motivation \\
+\item 2. Sampling-Based Motion Planning \\
+\item 3. Motion Primitives \\
+\item 4. \textit{Motions in Microseconds} \\
+\item 5. Strengths \& Weaknesses\\
+\item 6. Future Work \\
+\end{itemize}
 \end{frame}
 
 \section{Introduction}
@@ -56,7 +56,7 @@
 \subsection{Motivation}
 \begin{frame}{Motivation}
 \centering
-\animategraphics[loop,width=\textwidth]{7}{./assets/falling-robots/falling-robots-}{0}{47}
+\animategraphics[loop,width=\textwidth,autoplay]{7}{./assets/falling-robots/falling-robots-}{0}{47}
 (source: https://spectrum.ieee.org/falling-robots)
 \end{frame}
 
@@ -68,6 +68,7 @@
 \begin{block}{What is Sampling-Based Motion Planning (\textsc{sbmp})?}
 Sampling-based motion planning \textsc{sbmp} is a method of determining how a robot moves through configuration space by sampling values from that space. %list off examples of algorithms, note tree-based vs graph-based
 \end{block}
+\only<2>{\centering\vspace{10px}\animategraphics[loop, width=0.5\textwidth,autoplay]{30}{./assets/rrt_gif/rrt_gif-}{0}{30}}
 
 \pause
 \begin{block}{Why is it relevant?} 
@@ -76,18 +77,33 @@ However, it can take several seconds for \textsc{sbmp} methods to execute, so th
 \end{block}
 
 \pause
+\only<4>{\centering\vspace{10px}
+\begin{tabular}{ccc}
+want  &                 & have         \\
+      & $\leftrightarrow$ &              \\
+$<$ 1ms &                 & many seconds
+\end{tabular}
+}
+
+\pause
 \begin{block}{How do we optimize \textsc{sbmp}?}
 Over the years, many optimizations have been introduced to \textsc{sbmp}. We will discuss \textsc{vamp}, the Vector-Accelerated Motion Planning system as introduced by \cite{paper:MiM}.
 \end{block}
 \end{frame}
 
+\subsection{Example Execution}
+
 \begin{frame}{Example \textsc{sbmp} Execution: Problem Definition}
 %\only<1>{Problem Definition}\only<2>{Step 1: Sample State Space}\only<3>{Step 2: Connect State to Graph}\only<4>{Step 3: Graph Search}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_2.png}
+\only<1>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_2.png}}\only<2>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_2.5.png}}
 \end{frame}
 
 \begin{frame}{Example \textsc{sbmp} Execution: Sampling}
 \includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.png}
+\end{frame}
+
+\begin{frame}{Example \textsc{sbmp} Execution: State Validation}
+\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.25.png}
 \end{frame}
 
 \begin{frame}{Example \textsc{sbmp} Execution: State Validation}
@@ -157,19 +173,19 @@ Ensures that obstacles do not collide with the robot. Uses many passes of \texts
 
 %\cite{paper:MiM} presents Vector-Accelerated Motion Planning (\textsc{vamp}).
 
-\begin{frame}{Vectorizing Motion Planning}
-\pause
-\begin{block}{Vector}
-A \textit{vector} is a fixed-length sequence of scalar values.
-\end{block}
-
-\begin{block}{Vectorized Operation}
-A \textit{vectorized operation} acts on all values within the vector. This operation must be done independently, in parallel.
-\end{block}
-
-\pause
-\cite{paper:MiM} chose to focus on CPU-level parallelism, rather than GPU-level, process-level, or thread-level parallelism, so as to incur less overhead.
-\end{frame}
+%\begin{frame}{Vectorizing Motion Planning}
+%\pause
+%\begin{block}{Vector}
+%A \textit{vector} is a fixed-length sequence of scalar values.
+%\end{block}
+%
+%\begin{block}{Vectorized Operation}
+%A \textit{vectorized operation} acts on all values within the vector. This operation must be done independently, in parallel.
+%\end{block}
+%
+%\pause
+%\cite{paper:MiM} chose to focus on CPU-level parallelism, rather than GPU-level, process-level, or thread-level parallelism, so as to incur less overhead.
+%\end{frame}
 
 \begin{frame}{Vector Accelerated Motion Planning (\textsc{vamp})}
 \textsc{vamp} presents a novel planner that uses \textit{fine-grained} instruction-level parallelism to achieve substantial speedups.
@@ -179,33 +195,33 @@ A \textit{vectorized operation} acts on all values within the vector. This opera
 \pause
 \textsc{vamp}'s innovations over State of the Art:
 \begin{itemize}
-\item Struct-of-Arrays data representation
-\item Tracing Compiler
-\item Geometric Intersection Tests
-\item Raked Motion Validator implementation
+\item 1. Struct-of-Arrays data representation
+\item 2. Raked Motion Validator implementation
+\item 3. Geometric Intersection Tests
+\item 4. Tracing Compiler
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Struct-of-Arrays}
 %The more intuitive data representation is AoS, but
 \centering
-\includegraphics[width=\textwidth]{./assets/soa_aos.png}
+\includegraphics[height=0.8\textheight]{./assets/soa_aos_bar.png}
 \end{frame}
-%
-%\begin{frame}{\textsc{fk} Calculation}
-%\todo{walk thru featherstone 4.3}
-%\end{frame}
 
-\begin{frame}{Tracing Compiler}
-%\textsc{fk} has been difficult to parallelize with prior approaches due to data dependencies between link transforms in the kinematic chain.
-To vectorize \textsc{fk}:
-\begin{itemize}
-\item Trace the operations of the robot's kinematics from a \textsc{urdf} file.
-\item Generate a vector configuration structure for a batch of configurations. 
-\item Output a minimal set of operations to compute the traced function as an unrolled loop.
-\end{itemize}
 
-Notably, this tracing technique generates optimized \textsc{fk} implementations at compile time through automatic code generation.
+\begin{frame}{Raked Motion Validator}
+\centering
+\only<1>{\includegraphics[width=\textwidth]{./assets/rake/rake_1.png}
+}\only<2>{\includegraphics[width=\textwidth]{./assets/rake/rake_1_lines.png}
+}\only<3>{\includegraphics[width=\textwidth]{./assets/rake/rake_2.png}
+}\only<4>{\includegraphics[width=\textwidth]{./assets/rake/rake_2_obst.png}
+}\only<5>{\includegraphics[width=\textwidth]{./assets/rake/rake_3_obst.png}
+}\only<1>{\includegraphics[width=0.6\textwidth]{./assets/rrt_slides/rrt_slides_5.png}
+}\only<2>{\includegraphics[width=0.6\textwidth]{./assets/rake/rrt_slides_5.png}
+}\only<3>{\includegraphics[width=\textwidth]{./assets/rake/arm_no_obsts.png}
+}\only<4>{\includegraphics[width=\textwidth]{./assets/rake/arm_no_int.png}
+}\only<5>{\includegraphics[width=\textwidth]{./assets/rake/arm_int.png}
+}%\includegraphics[width=\textwidth]{./assets/mim_raked_mv_rearrange.png}
 \end{frame}
 
 \begin{frame}{Geometric Intersection Tests}
@@ -223,9 +239,16 @@ This approach does away with the staged broadphase and narrowphase approach to c
 \end{columns}
 \end{frame}
 
-\begin{frame}{Raked Motion Validator: Putting it all together}
-\centering
-\includegraphics[width=\textwidth]{./assets/mim_raked_mv_rearrange.png}
+\begin{frame}{Tracing Compiler}
+%\textsc{fk} has been difficult to parallelize with prior approaches due to data dependencies between link transforms in the kinematic chain.
+To vectorize \textsc{fk}:
+\begin{itemize}
+\item Trace the operations of the robot's kinematics from a \textsc{urdf} file.
+\item Generate a vector configuration structure for a batch of configurations. 
+\item Output a minimal set of operations to compute the traced function as an unrolled loop.
+\end{itemize}
+
+Notably, this tracing technique generates optimized \textsc{fk} implementations at compile time through automatic code generation.
 \end{frame}
 
 \section{Strengths \& Weaknesses}
@@ -245,9 +268,11 @@ With straightforward architechtural optimizations, the authors get upwards of 50
 %The authors made innovations that no one before them realized would matter so significantly.
 \end{frame}
 
+\subsection{Weaknesses}
+
 \begin{frame}{Weaknesses}
 The authors don't show an ablation study of which optimizations make which end-to-end performance impacts.
-\vspace{5px}
+\vspace{5px}\pause
 
 The paper does not describe what impacts the optimizations have as the problem size scales. The below table shows massive differences between the 7DOF Panda and the 8DOF Fetch robot.
 
@@ -276,7 +301,7 @@ The paper does not describe what impacts the optimizations have as the problem s
 \begin{itemize}
 \item Measure and identify precise bottlenecks within \textsc{sbmp}
 \item Optimize geometric intersection tests further
-\item Algorithm-compute codesign
+%\item Algorithm-compute codesign
 \end{itemize}
 
 \end{frame}
@@ -295,11 +320,11 @@ The paper does not describe what impacts the optimizations have as the problem s
 \includegraphics[height=0.37\textheight]{./assets/geom_fidelity.png}
 \end{frame}
 
-\begin{frame}{Algorithm-compute Codesign}
-When should we devote resources to one motion primitive over another? How do we separate \textit{what} we compute from \textit{how}?
-
-\todo{Paraphrase Radhika's description, find picture}
-\end{frame}
+%\begin{frame}{Algorithm-compute Codesign}
+%When should we devote resources to one motion primitive over another? How do we separate \textit{what} we compute from \textit{how}?
+%
+%\todo{Paraphrase Radhika's description, find picture}
+%\end{frame}
 
 \begin{frame}{End of Presentation}
 \end{frame}
@@ -331,7 +356,7 @@ When should we devote resources to one motion primitive over another? How do we 
 \begin{enumerate}
 \item Buff Future Work Slide
 \item Strengths \& Weaknesses both need a lift
-\item explanation of raked mv. animate?
+\item explanation of raked mv. animate.
 \item \textsc{fk} explanation on slide \ref{p_primitives} using featherstone ex 4.3 (ty radhika)
 \item cite things better, add bibliography
 \item Figures post-presentation
