@@ -68,7 +68,7 @@
 \begin{block}{What is Sampling-Based Motion Planning (\textsc{sbmp})?}
 Sampling-based motion planning \textsc{sbmp} is a method of determining how a robot moves through configuration space by sampling values from that space. %list off examples of algorithms, note tree-based vs graph-based
 \end{block}
-\only<2>{\centering\vspace{10px}\animategraphics[loop, width=0.5\textwidth,autoplay]{30}{./assets/rrt_gif/rrt_gif-}{0}{30}}
+\only<2>{\centering\vspace{10px}\animategraphics[loop, width=0.5\textwidth,autoplay]{0.8}{./assets/rrt_gif/rrt_gif-}{0}{30}}
 
 \pause
 \begin{block}{Why is it relevant?} 
@@ -93,41 +93,31 @@ Over the years, many optimizations have been introduced to \textsc{sbmp}. We wil
 
 \subsection{Example Execution}
 
-\begin{frame}{Example \textsc{sbmp} Execution: Problem Definition}
-%\only<1>{Problem Definition}\only<2>{Step 1: Sample State Space}\only<3>{Step 2: Connect State to Graph}\only<4>{Step 3: Graph Search}
-\only<1>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_2.png}}\only<2>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_2.5.png}}
-\end{frame}
+\begin{frame}{Example \textsc{sbmp} Execution}
+\centering
+\only<1>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_2.png}
+}\only<2>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_2.5.png}
+}\only<3>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.png}
+}\only<4>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.25.png}
+}\only<5>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.5.png}
+}\only<6>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_4.png}
+}\only<7>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_5.png}
+}\only<8>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_6.png}
+}\only<9>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_7.png}
+}\only<10>{\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_8.png}
+}
 
-\begin{frame}{Example \textsc{sbmp} Execution: Sampling}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.png}
-\end{frame}
-
-\begin{frame}{Example \textsc{sbmp} Execution: State Validation}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.25.png}
-\end{frame}
-
-\begin{frame}{Example \textsc{sbmp} Execution: State Validation}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_3.5.png}
-\end{frame}
-
-\begin{frame}{Example \textsc{sbmp} Execution: Local Planning}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_4.png}
-\end{frame}
-
-\begin{frame}{Example \textsc{sbmp} Execution: Collision Checking}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_5.png}
-\end{frame}
-
-\begin{frame}{Example \textsc{sbmp} Execution: Motion Validation}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_6.png}
-\end{frame}
-
-\begin{frame}{Example \textsc{sbmp} Execution: Generate Whole Graph}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_7.png}
-\end{frame}
-
-\begin{frame}{Example \textsc{sbmp} Execution: Find Path}
-\includegraphics[width=\textwidth]{./assets/rrt_slides/rrt_slides_8.png}
+\only<1>{Problem Definition
+}\only<2>{Configuration Space
+}\only<3>{Sampling
+}\only<4>{State Collision Check
+}\only<5>{State Validation
+}\only<6>{Local Planning
+}\only<7>{Edge Collision Check
+}\only<8>{Edge Validation
+}\only<9>{Generate Graph
+}\only<10>{Find Path
+}
 \end{frame}
 
 \subsection{Planning Primitives}
