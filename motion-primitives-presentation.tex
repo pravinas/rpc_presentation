@@ -185,11 +185,40 @@ Ensures that obstacles do not collide with the robot. Uses many passes of \texts
 \pause
 \textsc{vamp}'s innovations over State of the Art:
 \begin{itemize}
-\item 1. Struct-of-Arrays data representation
-\item 2. Raked Motion Validator implementation
-\item 3. Geometric Intersection Tests
-\item 4. Tracing Compiler
+\item 1. Geometric Intersection Tests
+\item 2. Tracing Compiler
+\item 3. Struct-of-Arrays data representation
+\item 4. Raked Motion Validator implementation
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Geometric Intersection Tests}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+By representing the robot as a system of geometric objects, intersection tests between pairs of objects can be vectorized.
+
+\vspace{10px}
+
+This approach does away with the staged broadphase and narrowphase approach to collision checking, but focuses soley on narrowphase.
+\end{column}
+\begin{column}{0.5\textwidth}
+\includegraphics[width=\textwidth]{./assets/panda_spheres.png}
+
+[\cite{paper:cuRobo}]
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Tracing Compiler}
+%\textsc{fk} has been difficult to parallelize with prior approaches due to data dependencies between link transforms in the kinematic chain.
+To vectorize \textsc{fk}:
+\begin{itemize}
+\item Trace the operations of the robot's kinematics from a \textsc{urdf} file.
+\item Generate a vector configuration structure for a batch of configurations. 
+\item Output a minimal set of operations to compute the traced function as an unrolled loop.
+\end{itemize}
+
+Notably, this tracing technique generates optimized \textsc{fk} implementations at compile time through automatic code generation.
 \end{frame}
 
 \begin{frame}{Struct-of-Arrays}
@@ -197,7 +226,6 @@ Ensures that obstacles do not collide with the robot. Uses many passes of \texts
 \centering
 \includegraphics[height=0.8\textheight]{./assets/soa_aos_bar.png}
 \end{frame}
-
 
 \begin{frame}{Raked Motion Validator}
 \centering
@@ -214,32 +242,8 @@ Ensures that obstacles do not collide with the robot. Uses many passes of \texts
 }%\includegraphics[width=\textwidth]{./assets/mim_raked_mv_rearrange.png}
 \end{frame}
 
-\begin{frame}{Geometric Intersection Tests}
-\begin{columns}
-\begin{column}{0.5\textwidth}
-By representing the robot as a system of geometric objects, intersection tests between pairs of objects can be vectorized.
 
-\vspace{10px}
 
-This approach does away with the staged broadphase and narrowphase approach to collision checking, but focuses soley on narrowphase.
-\end{column}
-\begin{column}{0.5\textwidth}
-\includegraphics[width=\textwidth]{./assets/panda_spheres.png}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Tracing Compiler}
-%\textsc{fk} has been difficult to parallelize with prior approaches due to data dependencies between link transforms in the kinematic chain.
-To vectorize \textsc{fk}:
-\begin{itemize}
-\item Trace the operations of the robot's kinematics from a \textsc{urdf} file.
-\item Generate a vector configuration structure for a batch of configurations. 
-\item Output a minimal set of operations to compute the traced function as an unrolled loop.
-\end{itemize}
-
-Notably, this tracing technique generates optimized \textsc{fk} implementations at compile time through automatic code generation.
-\end{frame}
 
 \section{Strengths \& Weaknesses}
 
@@ -294,13 +298,15 @@ The paper does not describe what impacts the optimizations have as the problem s
 \begin{itemize}
 \item Measure and identify precise bottlenecks within \textsc{sbmp}
 \item Optimize geometric intersection tests further
-%\item Algorithm-compute codesign
 \end{itemize}
 
 \end{frame}
 
 \begin{frame}{Measuring Bottlenecks}
-\includegraphics[width=\textwidth]{./assets/cc_nn_zoom.png}
+\only<1>{\includegraphics[width=\textwidth]{./assets/mbm.png}
+[\cite{paper:MBM}]}\only<2>{\includegraphics[width=\textwidth]{./assets/cc_nn_zoom.png}
+[Ghosal, Sacher, \textbf{Samaratunga}, Neuman, Plancher, Reddi 2024 (in preparation)]
+}
 \end{frame}
 
 \begin{frame}{Bounding Volume Fidelity Research}
@@ -311,15 +317,30 @@ The paper does not describe what impacts the optimizations have as the problem s
 \end{itemize}
 \centering
 \includegraphics[height=0.37\textheight]{./assets/geom_fidelity.png}
+
+[\cite{paper:cuRobo}]
 \end{frame}
 
-%\begin{frame}{Algorithm-compute Codesign}
-%When should we devote resources to one motion primitive over another? How do we separate \textit{what} we compute from \textit{how}?
-%
-%\todo{Paraphrase Radhika's description, find picture}
-%\end{frame}
+\section{Conclusion}
 
 \begin{frame}{End of Presentation}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textit{Motions in Microseconds} presents novel optimizations for \textsc{sbmp}.
+
+The main contribution, \textsc{vamp} is substantially faster than the state of the art.
+
+While the results are extremely promising, there is still further space for optimization.
+\end{column}
+\begin{column}{0.5\textwidth}
+\centering
+\animategraphics[loop,height=0.8\textheight,autoplay]{3}{./assets/waving/waving-}{1}{6}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+        \printbibliography
 \end{frame}
 
 \section{Extra Figures}
